@@ -1,0 +1,387 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Interactive Network Architecture Challenge</title>
+    <style>
+        :root {
+            --bg-color: #0f172a;
+            --card-bg: #1e293b;
+            --primary: #38bdf8;
+            --success: #10b981;
+            --error: #ef4444;
+            --text: #f8fafc;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: var(--bg-color);
+            color: var(--text);
+            margin: 0;
+            padding: 20px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            min-height: 100vh;
+        }
+
+        .container {
+            max-width: 900px;
+            width: 100%;
+            background: var(--card-bg);
+            padding: 30px;
+            border-radius: 12px;
+            box-shadow: 0 10px 25px rgba(0,0,0,0.3);
+        }
+
+        h1 {
+            text-align: center;
+            color: var(--primary);
+            margin-top: 0;
+        }
+
+        p.instructions {
+            text-align: center;
+            color: #94a3b8;
+            margin-bottom: 30px;
+        }
+
+        .game-area {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 30px;
+            margin-bottom: 30px;
+        }
+
+        @media (max-width: 768px) {
+            .game-area {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        .column {
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+        }
+
+        .column-title {
+            font-weight: bold;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            color: #94a3b8;
+            border-bottom: 2px solid #334155;
+            padding-bottom: 5px;
+        }
+
+        .draggable {
+            background: #334155;
+            padding: 15px;
+            border-radius: 8px;
+            cursor: grab;
+            border: 2px solid transparent;
+            transition: all 0.2s ease;
+            user-select: none;
+            font-weight: 600;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+
+        .draggable:active {
+            cursor: grabbing;
+        }
+
+        .draggable:hover {
+            border-color: var(--primary);
+            background: #475569;
+        }
+
+        .draggable.dragging {
+            opacity: 0.5;
+            border: 2px dashed var(--primary);
+        }
+
+        .dropzone {
+            background: #1e293b;
+            border: 2px dashed #475569;
+            padding: 20px;
+            border-radius: 8px;
+            min-height: 80px;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            position: relative;
+            transition: all 0.2s ease;
+        }
+
+        .dropzone p {
+            margin: 0 0 10px 0;
+            font-size: 0.95rem;
+            line-height: 1.4;
+        }
+
+        .dropzone .description-text {
+            color: #cbd5e1;
+        }
+
+        .dropzone.hovered {
+            border-color: var(--primary);
+            background: #334155;
+        }
+
+        .dropzone .placed-item {
+            background: var(--primary);
+            color: #0f172a;
+            padding: 10px;
+            border-radius: 6px;
+            font-weight: bold;
+            margin-top: 10px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            animation: popIn 0.2s ease;
+        }
+
+        .dropzone .remove-btn {
+            background: transparent;
+            border: none;
+            color: #0f172a;
+            font-weight: bold;
+            cursor: pointer;
+            font-size: 1.1rem;
+            padding: 0 5px;
+        }
+
+        .controls {
+            display: flex;
+            justify-content: center;
+            gap: 15px;
+        }
+
+        button.action-btn {
+            background: var(--primary);
+            color: #0f172a;
+            border: none;
+            padding: 12px 30px;
+            font-size: 1rem;
+            font-weight: bold;
+            border-radius: 6px;
+            cursor: pointer;
+            transition: background 0.2s;
+        }
+
+        button.action-btn:hover {
+            opacity: 0.9;
+        }
+
+        #reset-btn {
+            background: #475569;
+            color: var(--text);
+        }
+
+        .feedback {
+            text-align: center;
+            font-size: 1.2rem;
+            font-weight: bold;
+            margin-top: 20px;
+            min-height: 30px;
+        }
+
+        .success-text { color: var(--success); }
+        .error-text { color: var(--error); }
+
+        .correct-match { border: 2px solid var(--success) !important; }
+        .incorrect-match { border: 2px solid var(--error) !important; }
+
+        @keyframes popIn {
+            0% { transform: scale(0.95); opacity: 0; }
+            100% { transform: scale(1); opacity: 1; }
+        }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <h1>Structure of the Internet Challenge</h1>
+    <p class="instructions">Drag the core network components from the left column and drop them into their matching functional descriptions on the right.</p>
+
+    <div class="game-area">
+        <!-- Elements Column -->
+        <div class="column" id="elements-column">
+            <div class="column-title">Network Components</div>
+            <div class="draggable" draggable="true" id="as">AS (Autonomous System)</div>
+            <div class="draggable" draggable="true" id="ix">IX (Internet Exchange Point)</div>
+            <div class="draggable" draggable="true" id="isp">ISP (Internet Service Provider)</div>
+            <div class="draggable" draggable="true" id="access">Access Network Mediums</div>
+        </div>
+
+        <!-- Descriptions Column -->
+        <div class="column" id="targets-column">
+            <div class="column-title">Descriptions</div>
+            
+            <div class="dropzone" data-match="isp">
+                <p class="description-text"><strong>A.</strong> Physical entry points or boundary nodes situated along the edge of the core network cloud that link local traffic to global routes.</p>
+            </div>
+
+            <div class="dropzone" data-match="as">
+                <p class="description-text"><strong>B.</strong> Large, connected groups of IP routing prefixes managed by network operators that form the main corporate/structural "clouds" of the internet core.</p>
+            </div>
+
+            <div class="dropzone" data-match="access">
+                <p class="description-text"><strong>C.</strong> Physical or wireless transmission methods (like Cellular, Optical Fibre, DSL, and Satellite) that bridge end-user hardware to the boundary edge.</p>
+            </div>
+
+            <div class="dropzone" data-match="ix">
+                <p class="description-text"><strong>D.</strong> Centralized physical switch points (represented by structural square nodes) where independent networks directly converge to exchange traffic.</p>
+            </div>
+        </div>
+    </div>
+
+    <div class="controls">
+        <button class="action-btn" id="check-btn">Verify Answers</button>
+        <button class="action-btn" id="reset-btn">Reset Board</button>
+    </div>
+
+    <div class="feedback" id="feedback-msg"></div>
+</div>
+
+<script>
+    const draggables = document.querySelectorAll('.draggable');
+    const dropzones = document.querySelectorAll('.dropzone');
+    const checkBtn = document.getElementById('check-btn');
+    const resetBtn = document.getElementById('reset-btn');
+    const feedbackMsg = document.getElementById('feedback-msg');
+    const elementsColumn = document.getElementById('elements-column');
+
+    let draggedItem = null;
+
+    // Drag and Drop Event Listeners
+    draggables.forEach(draggable => {
+        draggable.addEventListener('dragstart', () => {
+            draggedItem = draggable;
+            draggable.classList.add('dragging');
+        });
+
+        draggable.addEventListener('dragend', () => {
+            draggable.classList.remove('dragging');
+            draggedItem = null;
+        });
+
+        // Touch Support for mobile devices
+        draggable.addEventListener('touchstart', (e) => {
+            draggedItem = draggable;
+            draggable.classList.add('dragging');
+        }, {passive: true});
+
+        draggable.addEventListener('touchend', (e) => {
+            draggable.classList.remove('dragging');
+            const changedTouch = e.changedTouches[0];
+            const elemBelow = document.elementFromPoint(changedTouch.clientX, changedTouch.clientY);
+            const dropzone = elemBelow ? elemBelow.closest('.dropzone') : null;
+            
+            if (dropzone && !dropzone.querySelector('.placed-item')) {
+                handleDrop(dropzone, draggedItem);
+            }
+            draggedItem = null;
+        });
+    });
+
+    dropzones.forEach(dropzone => {
+        dropzone.addEventListener('dragover', (e) => {
+            e.preventDefault();
+            if (!dropzone.querySelector('.placed-item')) {
+                dropzone.classList.add('hovered');
+            }
+        });
+
+        dropzone.addEventListener('dragleave', () => {
+            dropzone.classList.remove('hovered');
+        });
+
+        dropzone.addEventListener('drop', (e) => {
+            e.preventDefault();
+            dropzone.classList.remove('hovered');
+            if (draggedItem && !dropzone.querySelector('.placed-item')) {
+                handleDrop(dropzone, draggedItem);
+            }
+        });
+    });
+
+    function handleDrop(zone, item) {
+        item.style.display = 'none';
+        
+        const placedDiv = document.createElement('div');
+        placedDiv.classList.add('placed-item');
+        placedDiv.dataset.id = item.id;
+        placedDiv.innerText = item.innerText;
+
+        const removeBtn = document.createElement('button');
+        removeBtn.classList.add('remove-btn');
+        removeBtn.innerHTML = '&times;';
+        removeBtn.onclick = () => {
+            item.style.display = 'flex';
+            placedDiv.remove();
+            clearEvaluationStyles(zone);
+        };
+
+        placedDiv.appendChild(removeBtn);
+        zone.appendChild(placedDiv);
+    }
+
+    function clearEvaluationStyles(zone) {
+        zone.classList.remove('correct-match', 'incorrect-match');
+        feedbackMsg.innerText = '';
+    }
+
+    // Verify Evaluation
+    checkBtn.addEventListener('click', () => {
+        let allCorrect = true;
+        let totalPlaced = 0;
+
+        dropzones.forEach(zone => {
+            const placed = zone.querySelector('.placed-item');
+            zone.classList.remove('correct-match', 'incorrect-match');
+
+            if (placed) {
+                totalPlaced++;
+                if (zone.dataset.match === placed.dataset.id) {
+                    zone.classList.add('correct-match');
+                } else {
+                    zone.classList.add('incorrect-match');
+                    allCorrect = false;
+                }
+            } else {
+                allCorrect = false;
+            }
+        });
+
+        if (totalPlaced < 4) {
+            feedbackMsg.className = 'error-text';
+            feedbackMsg.innerText = 'Please place all components before verifying.';
+        } else if (allCorrect) {
+            feedbackMsg.className = 'success-text';
+            feedbackMsg.innerText = 'Excellent! You mapped out the structural stack flawlessly.';
+        } else {
+            feedbackMsg.className = 'error-text';
+            feedbackMsg.innerText = 'Some matches are incorrect. Inspect the red targets and try again!';
+        }
+    });
+
+    // Reset Board Configurations
+    resetBtn.addEventListener('click', () => {
+        dropzones.forEach(zone => {
+            const placed = zone.querySelector('.placed-item');
+            if (placed) placed.remove();
+            clearEvaluationStyles(zone);
+        });
+        draggables.forEach(item => {
+            item.style.display = 'flex';
+        });
+        feedbackMsg.innerText = '';
+    });
+</script>
+
+</body>
+</html>
